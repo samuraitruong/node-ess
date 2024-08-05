@@ -1,4 +1,3 @@
-export const BASEURL = "https://openapi.alphaess.com/api";
 
 export interface ESSData {
     sysSn?: string;

@@ -1,12 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
 import { Logger } from 'tslog';
 import * as crypto from 'crypto';
+import { ApiResponse, ChargeSettings, DischargeSettings, ESSData } from './model';
 
 const logger = new Logger();
-
-
-
-
+export const BASEURL = "https://openapi.alphaess.com/api";
 
 export class AlphaESS {
     private appID: string;
@@ -70,11 +68,16 @@ export class AlphaESS {
             const response = await this.axiosInstance.post<ApiResponse<T>>(path, json, { headers });
 
             if (response.data.msg !== 'Success') {
+                if (response.data.msg === 'The maximum number of requests has been reached') {
+                    // handle retry 
+
+                }
                 logger.error(`Unexpected response: ${JSON.stringify(response.data)} when calling ${path}`);
                 return null;
             }
             return response.data.data;
         } catch (error) {
+
             logger.error(error);
             throw error;
         }
