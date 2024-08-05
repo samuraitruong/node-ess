@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
+
 permissions:
   contents: write  # This gives write permissions for committing changes to the repository
   packages: write  # This is needed if you are publishing packages
@@ -34,19 +38,19 @@ jobs:
     - name: Build packages
       run: pnpm run build
 
-    # - name: Publish to npm
-    #   run: pnpm publish -r --filter ./packages/node-ess --access public
-    #   env:
-    #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
     - name: Semantic Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: npx semantic-release
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          npx semantic-release --dry-run
+        else
+          npx semantic-release
+        fi
 
     - name: Push changes back to repository
-      if: always()
+      if: github.event_name == 'push' && success()
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
